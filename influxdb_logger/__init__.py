@@ -3,6 +3,7 @@ __version__ = "0.1.0"
 import logging
 
 from influxdb_client import InfluxDBClient
+from influxdb_client.domain.buckets import Buckets
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 
@@ -37,7 +38,7 @@ class InfluxHandler(logging.Handler):
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
         self.query_api = self.client.query_api()
         self.buckets_api = self.client.buckets_api()
-        self._check_token_and_bucket(bucket_name)
+        self._check_token()
 
         # Checking for tags
         if tag_key and tag_value:
@@ -51,11 +52,13 @@ class InfluxHandler(logging.Handler):
                 logging.Formatter(f'logger %(levelname)s="%(lineno)d %(message)s"')
             )
 
-    def _check_token_and_bucket(self, bucket_name: str):
+    def _check_token(self):
         """Checks if the entered credential works and bucket exist"""
-        bucket_list: list = self.buckets_api.find_buckets()
-        if not bucket_name in bucket_list:
-            raise ValueError("Bucket Does Not Exist.")
+        bucket_list: Buckets = self.buckets_api.find_buckets()
+
+        # TO DO - Check if bucket name is there in bucket_list
+
+        
 
     def emit(self, record):
         log = self.format(record)
