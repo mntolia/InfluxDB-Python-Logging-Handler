@@ -1,8 +1,9 @@
-__version__ = '0.1.0'
+__version__ = "0.1.0"
 
 import logging
 
-import httpx
+from influxdb_client import InfluxDBClient
+from influxdb_client.client.write_api import SYNCHRONOUS
 
 
 class InfluxHandler(logging.Handler):
@@ -32,10 +33,11 @@ class InfluxHandler(logging.Handler):
         self.token = token
         self.bucket_name = bucket_name
         self.org = org
-        self.client = httpx.Client(
-            base_url=url, headers={"Authorization": f"Token {token}"}, timeout=10
-        )
-        self._check_token()
+        self.client = InfluxDBClient(url=url, token=token, org=org)
+        self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
+        self.query_api = self.client.query_api()
+        self.buckets_api = self.client.buckets_api()
+        self._check_token_and_bucket(bucket_name)
 
         # Checking for tags
         if tag_key and tag_value:
@@ -49,18 +51,16 @@ class InfluxHandler(logging.Handler):
                 logging.Formatter(f'logger %(levelname)s="%(lineno)d %(message)s"')
             )
 
-    def _check_token(self):
-        """Checks if the entered credential works"""
-        response = self.client.get("/")
-        if response.status_code != 200:
-            raise ValueError(
-                f"Check Parameters. Response Code: {response.status_code}. Message: {response.content}"
-            )
+    def _check_token_and_bucket(self, bucket_name: str):
+        """Checks if the entered credential works and bucket exist"""
+        bucket_list: list = self.buckets_api.find_buckets()
+        if not bucket_name in bucket_list:
+            raise ValueError("Bucket Does Not Exist.")
 
     def emit(self, record):
         log = self.format(record)
-        self.client.post(
-            "/api/v2/write",
-            params={"bucket": self.bucket_name, "org": self.org},
-            data=log,
-        )
+        self.write_api.write(
+            bucket=self.bucket_name, 
+            org=self.org, 
+            record=log
+            )
