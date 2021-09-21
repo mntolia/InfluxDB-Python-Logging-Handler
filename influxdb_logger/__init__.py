@@ -23,7 +23,7 @@ class InfluxHandler(logging.Handler):
         bucket_name: str,
         org: str,
         tag_key: str = None,
-        tag_value: str = None
+        tag_value: str = None,
     ) -> None:
         """Creates the InfluxDB Handler Object.
         Will not take any formatter
@@ -51,17 +51,13 @@ class InfluxHandler(logging.Handler):
                 logging.Formatter(f'logger %(levelname)s="%(lineno)d %(message)s"')
             )
 
-    def _check_token(self):
+    def _check_token(self) -> None:
         """Checks if the entered credential works and bucket exist"""
         bucket_list: Buckets = self.buckets_api.find_buckets()
 
         # TO DO - Check if bucket name is there in bucket_list
 
-    def emit(self, record):
+    def emit(self, record) -> None:
         log = self.format(record)
         print(f"Emitting: {log}")
-        self.write_api.write(
-            bucket=self.bucket_name, 
-            org=self.org, 
-            record=log
-            )
+        self.write_api.write(bucket=self.bucket_name, org=self.org, record=log)
