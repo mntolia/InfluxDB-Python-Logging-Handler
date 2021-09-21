@@ -23,13 +23,12 @@ class InfluxHandler(logging.Handler):
         bucket_name: str,
         org: str,
         tag_key: str = None,
-        tag_value: str = None,
-        level=logging.INFO,
+        tag_value: str = None
     ) -> None:
         """Creates the InfluxDB Handler Object.
         Will not take any formatter
         """
-        super().__init__(level=level)
+        super().__init__()
         self.url = url
         self.token = token
         self.bucket_name = bucket_name
