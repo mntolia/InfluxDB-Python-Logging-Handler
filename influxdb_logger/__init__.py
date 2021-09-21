@@ -58,10 +58,9 @@ class InfluxHandler(logging.Handler):
 
         # TO DO - Check if bucket name is there in bucket_list
 
-        
-
     def emit(self, record):
         log = self.format(record)
+        print(f"Emitting: {log}")
         self.write_api.write(
             bucket=self.bucket_name, 
             org=self.org, 
