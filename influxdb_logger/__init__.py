@@ -37,7 +37,6 @@ class InfluxHandler(logging.Handler):
         self.write_api = self.client.write_api(write_options=SYNCHRONOUS)
         self.query_api = self.client.query_api()
         self.buckets_api = self.client.buckets_api()
-        self._check_token()
 
         # Checking for tags
         if tag_key and tag_value:
@@ -51,9 +50,9 @@ class InfluxHandler(logging.Handler):
                 logging.Formatter(f'logger %(levelname)s="%(lineno)d %(message)s"')
             )
 
-    def _check_token(self) -> None:
+    def check_token(self) -> None:
         """Checks if the entered credential works and bucket exist"""
-        bucket_list: Buckets = self.buckets_api.find_buckets()
+        self.buckets_api.find_buckets()
 
         # TO DO - Check if bucket name is there in bucket_list
 
